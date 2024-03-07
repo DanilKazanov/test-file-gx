@@ -1,7 +1,9 @@
 {
 	"type": "module",
 	"scripts": {
-		"build": "rollup -c rollup.config.js"
+		"build": "rollup -c rollup.config.js",
+		"start":"node dist/bundle.js",
+		"run":"npm run build && npm run start"
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^25.0.7",
