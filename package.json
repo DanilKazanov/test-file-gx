@@ -2,8 +2,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "rollup -c rollup.config.js",
-		"start":"node dist/bundle.js",
-		"run":"npm run build && npm run start"
+		"start": "node dist/bundle.js",
+		"run": "npm run build && npm run start"
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^25.0.7",
@@ -12,5 +12,8 @@
 		"rollup": "^4.9.5",
 		"rollup-plugin-typescript2": "^0.36.0",
 		"tslib": "^2.6.2"
+	},
+	"dependencies": {
+		"jszip": "^3.10.1"
 	}
 }
