@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import JSZip from 'jszip';
+import unzipper from 'unzipper';
 
 
 interface SomeZipper {
@@ -59,6 +60,15 @@ const zipFunc = async (pathToDir: string, fp: FileSystemProvider) => {
     return zip.generateAsync({ type: "nodebuffer" });
 };
 
+const unzipFunc = (pathToZip: string, outputPath: string) => {
+  fs.createReadStream(pathToZip)
+    .pipe(unzipper.Extract({ path: outputPath }));
+}
+
+unzipFunc('C:/Users/User1/Desktop/New folder/zipped/archive.zip', 'C:/Users/User1/Desktop/New folder/unzipped')
+
+// C:/Users/User1/DesktopNew folder/zipped/archive.zip
+
 const runZip = async () => {
     const pathToDirectory = 'C:/Users/User1/Desktop/New folder/bin';
     const fileProvider = new FileSystemProvider();
@@ -67,7 +77,7 @@ const runZip = async () => {
     console.log("Архивация завершена, архив сохранён.", zippedContent);
   };
   
-  runZip().catch(console.error);
+  // runZip().catch(console.error);
 
 export {};
 
