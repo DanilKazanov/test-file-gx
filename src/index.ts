@@ -5,8 +5,8 @@ import unzipper from 'unzipper';
 
 
 interface SomeZipper {
-    zip(pathToDir: string, fp: any): Promise<Buffer>;
-    unzip(pathToUnzip: string, content: any, fp: any): Promise<void>;
+    zip(pathToDir: string, fp: FileSystemProvider): Promise<Buffer>;
+    unzip(pathToUnzip: string, content: any, fp: FileSystemProvider): Promise<void>;
   }
 
 class FileSystemProvider {
@@ -39,45 +39,52 @@ class FileSystemProvider {
   }
 }
 
-const zipFunc = async (pathToDir: string, fp: FileSystemProvider) => {
+class CustomZipper implements SomeZipper {
+  async zip(pathToDir: string, fp: FileSystemProvider): Promise<Buffer> {
     const zip = new JSZip();
     const rootPath = path.resolve(pathToDir);
-
+  
     const addFiles = async (currentPath: string, zipPath: string) => {
-      const items = await fp.getItems(currentPath);
-      for (const item of items) {
-        const currentZipPath = path.join(zipPath, item.path.substring(rootPath.length + 1));
-        if (item.isFile) {
-          const fileContent = await fp.readAsBinary(item.path);
-          zip.file(currentZipPath, fileContent);
+    const items = await fp.getItems(currentPath);
+    for (const item of items) {
+      const currentZipPath = path.join(zipPath, item.path.substring(rootPath.length + 1));
+      if (item.isFile) {
+        const fileContent = await fp.readAsBinary(item.path);
+        zip.file(currentZipPath, fileContent);
         } else {
           await addFiles(item.path, currentZipPath);
         }
       }
     };
-
-    await addFiles(rootPath, '');
-    return zip.generateAsync({ type: "nodebuffer" });
-};
-
-const unzipFunc = (pathToZip: string, outputPath: string) => {
-  fs.createReadStream(pathToZip)
-    .pipe(unzipper.Extract({ path: outputPath }));
+  await addFiles(rootPath, '');
+  return zip.generateAsync({ type: "nodebuffer" });
+  }
+  
+  async unzip(pathToUnzip: string, content: any, fp: FileSystemProvider): Promise<void> {
+  fs.createReadStream(pathToUnzip)
+  .pipe(unzipper.Extract({ path: content }));
+  }
 }
 
-unzipFunc('C:/Users/User1/Desktop/New folder/zipped/archive.zip', 'C:/Users/User1/Desktop/New folder/unzipped')
-
-// C:/Users/User1/DesktopNew folder/zipped/archive.zip
+const fileProvider = new FileSystemProvider();
+const zipper = new CustomZipper();
 
 const runZip = async () => {
-    const pathToDirectory = 'C:/Users/User1/Desktop/New folder/bin';
-    const fileProvider = new FileSystemProvider();
-    const zippedContent = await zipFunc(pathToDirectory, fileProvider);
-    await fs.promises.writeFile('C:/Users/User1/Desktop/New folder/zipped/archive.zip', zippedContent);
-    console.log("Архивация завершена, архив сохранён.", zippedContent);
-  };
-  
-  // runZip().catch(console.error);
+  const pathToDirectory = 'C:/Users/User1/Desktop/arch/toZipFolder';
+  const zippedContent = await zipper.zip(pathToDirectory, fileProvider);
+  await fs.promises.writeFile('C:/Users/User1/Desktop/arch/toZip/Zip.zip', zippedContent);
+  console.log("Архивация завершена, архив сохранён.");
+};
+
+const runUnzip = async () => {
+  const pathToUnzip = 'C:/Users/User1/Desktop/arch/toUnzipZip.zip';
+  const contentToUnzip = 'C:/Users/User1/Desktop/arch/toUnzip';
+  await zipper.unzip(pathToUnzip, contentToUnzip, fileProvider);
+  console.log("Разархивация завершена.");
+};
+
+// runZip().catch(console.error);
+runUnzip().catch(console.error)
 
 export {};
 
