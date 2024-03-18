@@ -2,11 +2,6 @@ import FileSystemProvider from "./components/FileSystemProvider";
 import CustomZipper from "./components/CustomZipper";
 import fs from 'fs';
 
-interface SomeZipper {
-    zip(pathToDir: string, fp: FileSystemProvider): Promise<Buffer>;
-    unzip(pathToUnzip: string, content: any, fp: FileSystemProvider): Promise<void>;
-  }
-
 const fileProvider = new FileSystemProvider();
 const zipper = new CustomZipper();
 
@@ -27,6 +22,6 @@ const runUnzip = async () => {
 // runZip().catch(console.error);
 runUnzip().catch(console.error)
 
-export default SomeZipper;
+
 
 

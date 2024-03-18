@@ -2,7 +2,7 @@ import path from 'path';
 import JSZip from 'jszip';
 import unzipper from 'unzipper';
 import fs from 'fs';
-import SomeZipper from '..';
+import SomeZipper from '../models/models';
 import FileSystemProvider from './FileSystemProvider';
 
 class CustomZipper implements SomeZipper {
