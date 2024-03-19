@@ -1,8 +1,6 @@
 import path from "path";
 import JSZip from "jszip";
-import unzipper from "unzipper";
-import fs from "fs";
-import SomeZipper from "..";
+import SomeZipper from "../models/models";
 import FileSystemProvider from "./FileSystemProvider";
 
 class CustomZipper implements SomeZipper {
@@ -26,8 +24,25 @@ class CustomZipper implements SomeZipper {
 		return zip.generateAsync({ type: "nodebuffer" });
 	}
 
-	async unzip(pathToUnzip: string, content: any, fp: FileSystemProvider): Promise<void> {
-		fs.createReadStream(pathToUnzip).pipe(unzipper.Extract({ path: content }));
+	async unzip(zippedContent: Buffer, outputDirectory: string, fp: FileSystemProvider): Promise<void> {
+		const zip = await JSZip.loadAsync(zippedContent);
+
+		const extractFiles = async (folder: JSZip) => {
+			await Promise.all(
+				Object.keys(folder.files).map(async (fileName) => {
+					const file = folder.files[fileName];
+					if (file.dir) {
+						await extractFiles(zip);
+					} else {
+						const fileContent = await file.async("nodebuffer");
+						const filePath = path.join(outputDirectory, fileName);
+						await fp.write(filePath, JSON.stringify(fileContent));
+					}
+				})
+			);
+		};
+
+		await extractFiles(zip);
 	}
 }
 
