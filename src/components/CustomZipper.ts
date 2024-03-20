@@ -11,7 +11,8 @@ class CustomZipper implements SomeZipper {
 		const addFiles = async (currentPath: string, zipPath: string) => {
 			const items = await fp.getItems(currentPath);
 			for (const item of items) {
-				const currentZipPath = path.join(zipPath, item.path.substring(rootPath.length + 1));
+				const relativeFilePath = path.relative(rootPath, item.path);
+				const currentZipPath = path.join(zipPath, relativeFilePath);
 				if (item.isFile) {
 					const fileContent = await fp.readAsBinary(item.path);
 					zip.file(currentZipPath, fileContent);
@@ -27,22 +28,17 @@ class CustomZipper implements SomeZipper {
 	async unzip(zippedContent: Buffer, outputDirectory: string, fp: FileSystemProvider): Promise<void> {
 		const zip = await JSZip.loadAsync(zippedContent);
 
-		const extractFiles = async (folder: JSZip) => {
-			await Promise.all(
-				Object.keys(folder.files).map(async (fileName) => {
-					const file = folder.files[fileName];
-					if (file.dir) {
-						await extractFiles(zip);
-					} else {
-						const fileContent = await file.async("nodebuffer");
-						const filePath = path.join(outputDirectory, fileName);
-						await fp.write(filePath, JSON.stringify(fileContent));
-					}
-				})
-			);
-		};
-
-		await extractFiles(zip);
+		await Promise.all(
+			Object.entries(zip.files).map(async ([fileName, file]) => {
+				if (!file.dir) {
+					const fileContent = await file.async("nodebuffer");
+					const filePath = path.join(outputDirectory, fileName);
+					const directoryPath = path.dirname(filePath);
+					await fp.mkdir(directoryPath);
+					await fp.write(filePath, fileContent);
+				}
+			})
+		);
 	}
 }
 

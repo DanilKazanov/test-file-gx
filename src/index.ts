@@ -6,7 +6,7 @@ const fileProvider = new FileSystemProvider();
 const zipper = new CustomZipper();
 
 const runZip = async () => {
-	const pathToDirectory = "C:/Users/User1/Desktop/New folder/unzipped";
+	const pathToDirectory = "C:/Users/User1/Desktop/New folder/forZip";
 	const pathToUnzip = await zipper.zip(pathToDirectory, fileProvider);
 	await fs.promises.writeFile("C:/Users/User1/Desktop/New folder/zipped/Zip.zip", pathToUnzip);
 	await runUnzip(pathToUnzip);
@@ -14,7 +14,7 @@ const runZip = async () => {
 };
 
 const runUnzip = async (zippedContent: Buffer) => {
-	const outputDirectory = "C:/Users/User1/Desktop/New folder/unzipped/new";
+	const outputDirectory = "C:/Users/User1/Desktop/New folder/unzipped";
 	await zipper.unzip(zippedContent, outputDirectory, fileProvider);
 	console.log("Разархивация завершена.");
 };

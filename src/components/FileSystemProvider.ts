@@ -6,7 +6,7 @@ class FileSystemProvider {
 		return fs.promises.readFile(filePath, { encoding: "utf-8" });
 	}
 
-	async write(filePath: string, content: string) {
+	async write(filePath: string, content: Buffer) {
 		await fs.promises.writeFile(filePath, content, { encoding: "utf-8" });
 	}
 
